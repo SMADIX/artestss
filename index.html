@@ -23,13 +23,27 @@
     <a-assets>
       <video id="arVideo" src="./my_video.mp4" loop="true" crossorigin="anonymous" playsinline
         webkit-playsinline></video>
+      <a-asset-item id="myModel" src="./model.glb"></a-asset-item>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-entity id="target" mindar-image-target="targetIndex: 0">
-      <!-- قياس 1080 عرض و 1920 طول (الارتفاع قسمة العرض = 1920/1080 = 1.778) -->
-      <a-video src="#arVideo" width="1" height="1.778" position="0 0 0"></a-video>
+      <!-- حاوية لعناصر الـ AR لتطبيق تأثير الظهور (Transition) -->
+      <a-entity id="ar-container" scale="0 0 0" 
+        animation="property: scale; from: 0 0 0; to: 1 1 1; dur: 800; easing: easeOutElastic; startEvents: start-anim">
+        
+        <!-- قياس 1080 عرض و 1920 طول (الارتفاع قسمة العرض = 1920/1080 = 1.778) -->
+        <a-video src="#arVideo" width="1" height="1.778" position="0 0 0"></a-video>
+
+        <!-- نص إبداعي في الأسفل -->
+        <a-text value="Made by SMADI AGENCY" position="0 -1.1 0" align="center" color="#FFFFFF" width="2.5" font="kelsonsans"></a-text>
+
+        <!-- موديل 3D في الأعلى مع تأثير دوران خفيف -->
+        <!-- تأكد من وضع ملف model.glb في نفس المجلد -->
+        <a-gltf-model src="#myModel" position="0 1.2 0" scale="0.3 0.3 0.3" 
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear;"></a-gltf-model>
+      </a-entity>
     </a-entity>
   </a-scene>
 
@@ -39,6 +53,7 @@
       const startButton = document.getElementById('startButton');
       const video = document.getElementById('arVideo');
       const target = document.getElementById('target');
+      const arContainer = document.getElementById('ar-container');
 
       // عند ضغط زر البداية
       startButton.addEventListener('click', function () {
@@ -56,12 +71,17 @@
       target.addEventListener("targetFound", event => {
         console.log("تم العثور على الصورة، تشغيل...");
         video.play();
+        // إطلاق حركة الظهور (Transition)
+        arContainer.emit('start-anim');
       });
 
       // إيقاف الفيديو عند اختفاء الصورة
       target.addEventListener("targetLost", event => {
         console.log("الصورة مفقودة، إيقاف...");
         video.pause();
+        // تصفير حجم الحاوية فوراً لكي تظهر الحركة عند العثور على الصورة مرة أخرى
+        // (ملاحظة: اختفاء التتبع يكون فورياً بسبب طبيعة عمل مكتبة MindAR في إخفاء العنصر عند فقدان الصورة)
+        arContainer.setAttribute('scale', '0 0 0');
       });
     });
   </script>
