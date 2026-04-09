@@ -30,18 +30,19 @@
 
     <a-entity id="target" mindar-image-target="targetIndex: 0">
       <!-- حاوية لعناصر الـ AR لتطبيق تأثير الظهور (Transition) -->
-      <a-entity id="ar-container" scale="0 0 0" 
+      <a-entity id="ar-container" scale="0 0 0"
         animation="property: scale; from: 0 0 0; to: 1 1 1; dur: 800; easing: easeOutElastic; startEvents: start-anim">
-        
+
         <!-- قياس 1080 عرض و 1920 طول (الارتفاع قسمة العرض = 1920/1080 = 1.778) -->
         <a-video src="#arVideo" width="1" height="1.778" position="0 0 0"></a-video>
 
         <!-- نص إبداعي في الأسفل -->
-        <a-text value="Made by SMADI AGENCY" position="0 -1.1 0" align="center" color="#FFFFFF" width="2.5" font="kelsonsans"></a-text>
+        <a-text value="Made by SMADI AGENCY" position="0 -1.1 0" align="center" color="#FFFFFF" width="2.5"
+          font="kelsonsans"></a-text>
 
         <!-- موديل 3D في الأعلى مع تأثير دوران خفيف -->
         <!-- تأكد من وضع ملف model.glb في نفس المجلد -->
-        <a-gltf-model src="#myModel" position="0 1.2 0" scale="0.3 0.3 0.3" 
+        <a-gltf-model src="#myModel" position="0 1.2 0" scale="0.3 0.3 0.3"
           animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear;"></a-gltf-model>
       </a-entity>
     </a-entity>
