@@ -11,15 +11,42 @@
   <a-scene mindar-image="imageTargetSrc: ./targets.mind;" vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
     <a-assets>
-      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous"></video>
+      <!-- أضفنا playsinline و muted حتى يعمل الفيديو بدون مشاكل في المتصفحات -->
+      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted></video>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <a-entity mindar-image-target="targetIndex: 0">
-      <a-video src="#arVideo" width="1" height="0.6" position="0 0 0"></a-video>
+    <!-- أضفنا id="target" لربطه بالكود تحت -->
+    <a-entity id="target" mindar-image-target="targetIndex: 0">
+      <!-- 
+        قمنا بتغيير height إلى 1.778 بافتراض أن الفيديو تم تصويره بالطول (مثل الهاتف).
+        - لفيديو طولي: width="1" height="1.778"
+        - لفيديو بالأساس بالعرض: width="1" height="0.56"
+        - لفيديو مربع: width="1" height="1" 
+      -->
+      <a-video src="#arVideo" width="1" height="1.778" position="0 0 0"></a-video>
     </a-entity>
   </a-scene>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const target = document.querySelector('#target');
+      const video = document.querySelector('#arVideo');
+
+      // عند التعرف على الصورة (بداية التتبع)
+      target.addEventListener("targetFound", event => {
+        console.log("تم العثور على الصورة، تشغيل الفيديو...");
+        video.play();
+      });
+
+      // عند اختفاء الصورة
+      target.addEventListener("targetLost", event => {
+        console.log("الصورة مفقودة، إيقاف الفيديو...");
+        video.pause();
+      });
+    });
+  </script>
 </body>
 
 </html>
