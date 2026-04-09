@@ -8,41 +8,52 @@
 </head>
 
 <body>
+  <!-- شاشة بداية لضمان تفاعل المستخدم (يحل مشاكل تشغيل الفيديو في جميع المتصفحات) -->
+  <div id="startScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; font-family: sans-serif;">
+    <h2>تجربة الواقع المعزز</h2>
+    <p>اضغط على الزر لتشغيل الكاميرا والفيديو</p>
+    <button id="startButton" style="padding: 15px 30px; font-size: 18px; background: #06B6D4; color: white; border: none; border-radius: 8px; cursor: pointer;">بدأ التجربة</button>
+  </div>
+
   <a-scene mindar-image="imageTargetSrc: ./targets.mind;" vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
     <a-assets>
-      <!-- أضفنا playsinline و muted حتى يعمل الفيديو بدون مشاكل في المتصفحات -->
-      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted></video>
+      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted autoplay></video>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- أضفنا id="target" لربطه بالكود تحت -->
     <a-entity id="target" mindar-image-target="targetIndex: 0">
-      <!-- 
-        قمنا بتغيير height إلى 1.778 بافتراض أن الفيديو تم تصويره بالطول (مثل الهاتف).
-        - لفيديو طولي: width="1" height="1.778"
-        - لفيديو بالأساس بالعرض: width="1" height="0.56"
-        - لفيديو مربع: width="1" height="1" 
-      -->
-      <a-video src="#arVideo" width="1" height="1.778" position="0 0 0"></a-video>
+      <!-- أعدنا القياس ليكون فيديو بالعرض (0.56) بناءً على صورتك المرفقة -->
+      <a-video src="#arVideo" width="1" height="0.56" position="0 0 0"></a-video>
     </a-entity>
   </a-scene>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const target = document.querySelector('#target');
-      const video = document.querySelector('#arVideo');
+    document.addEventListener("DOMContentLoaded", function () {
+      const startScreen = document.getElementById('startScreen');
+      const startButton = document.getElementById('startButton');
+      const video = document.getElementById('arVideo');
+      const target = document.getElementById('target');
 
-      // عند التعرف على الصورة (بداية التتبع)
+      // عند ضغط زر البداية
+      startButton.addEventListener('click', function () {
+        startScreen.style.display = 'none';
+        
+        // تشغيل الفيديو وإيقافه فوراً (هذه خدعة ذكية لتعريف المتصفح أن المستخدم سمح بتشغيل الفيديو)
+        video.play();
+        video.pause();
+      });
+
+      // تشغيل الفيديو عند رؤية الصورة
       target.addEventListener("targetFound", event => {
-        console.log("تم العثور على الصورة، تشغيل الفيديو...");
+        console.log("تم العثور على الصورة، تشغيل...");
         video.play();
       });
 
-      // عند اختفاء الصورة
+      // إيقاف الفيديو عند اختفاء الصورة
       target.addEventListener("targetLost", event => {
-        console.log("الصورة مفقودة، إيقاف الفيديو...");
+        console.log("الصورة مفقودة، إيقاف...");
         video.pause();
       });
     });
