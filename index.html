@@ -21,15 +21,14 @@
   <a-scene mindar-image="imageTargetSrc: ./targets.mind;" vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
     <a-assets>
-      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted
-        autoplay></video>
+      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous" playsinline webkit-playsinline></video>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-entity id="target" mindar-image-target="targetIndex: 0">
-      <!-- أعدنا القياس ليكون فيديو بالعرض (0.56) بناءً على صورتك المرفقة -->
-      <a-video src="#arVideo" width="1" height="0.56" position="0 0 0"></a-video>
+      <!-- قياس 1080 عرض و 1920 طول (الارتفاع قسمة العرض = 1920/1080 = 1.778) -->
+      <a-video src="#arVideo" width="1" height="1.778" position="0 0 0"></a-video>
     </a-entity>
   </a-scene>
 
@@ -43,6 +42,9 @@
       // عند ضغط زر البداية
       startButton.addEventListener('click', function () {
         startScreen.style.display = 'none';
+
+        // تفعيل الصوت بعد تفاعل المستخدم مع الشاشة
+        video.muted = false;
 
         // تشغيل الفيديو وإيقافه فوراً (هذه خدعة ذكية لتعريف المتصفح أن المستخدم سمح بتشغيل الفيديو)
         video.play();
