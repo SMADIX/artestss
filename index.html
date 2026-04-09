@@ -9,16 +9,20 @@
 
 <body>
   <!-- شاشة بداية لضمان تفاعل المستخدم (يحل مشاكل تشغيل الفيديو في جميع المتصفحات) -->
-  <div id="startScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; font-family: sans-serif;">
+  <div id="startScreen"
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; font-family: sans-serif;">
     <h2>تجربة الواقع المعزز</h2>
     <p>اضغط على الزر لتشغيل الكاميرا والفيديو</p>
-    <button id="startButton" style="padding: 15px 30px; font-size: 18px; background: #06B6D4; color: white; border: none; border-radius: 8px; cursor: pointer;">بدأ التجربة</button>
+    <button id="startButton"
+      style="padding: 15px 30px; font-size: 18px; background: #06B6D4; color: white; border: none; border-radius: 8px; cursor: pointer;">بدأ
+      التجربة</button>
   </div>
 
   <a-scene mindar-image="imageTargetSrc: ./targets.mind;" vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
     <a-assets>
-      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted autoplay></video>
+      <video id="arVideo" src="./my_video.MOV" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted
+        autoplay></video>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -39,7 +43,7 @@
       // عند ضغط زر البداية
       startButton.addEventListener('click', function () {
         startScreen.style.display = 'none';
-        
+
         // تشغيل الفيديو وإيقافه فوراً (هذه خدعة ذكية لتعريف المتصفح أن المستخدم سمح بتشغيل الفيديو)
         video.play();
         video.pause();
