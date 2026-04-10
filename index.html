@@ -21,8 +21,8 @@
 
         this.myMaterial = new THREE.ShaderMaterial({
           uniforms: {
-            color: { type: 'c', value: col },
-            texture: { type: 't', value: videoTexture }
+            color: { value: col },
+            srcTexture: { value: videoTexture }
           },
           vertexShader: `
             varying vec2 vUv;
@@ -33,10 +33,10 @@
           `,
           fragmentShader: `
             uniform vec3 color;
-            uniform sampler2D texture;
+            uniform sampler2D srcTexture;
             varying vec2 vUv;
             void main() {
-              vec4 texColor = texture2D(texture, vUv);
+              vec4 texColor = texture2D(srcTexture, vUv);
               // حساب درجة التطابق مع اللون الأخضر
               float dist = length(texColor.rgb - color);
               // جعل اللون المتقارب شفافاً بالتدريج
@@ -73,9 +73,9 @@
 
   <a-scene mindar-image="imageTargetSrc: ./crttargets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 0.1;"
     vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-    <a-assets>
+    <a-assets timeout="5000">
       <video id="arVideo" src="./my_video7.mp4" loop="true" crossorigin="anonymous" playsinline
-        webkit-playsinline></video>
+        webkit-playsinline muted preload="auto"></video>
       <a-asset-item id="myModel" src="./model.glb"></a-asset-item>
     </a-assets>
 
