@@ -6,17 +6,20 @@
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <script>
-    // تسجيل كود برمجي (Shader) لإزالة اللون الأخضر من خلفية الفيديو (الكروما)
-    AFRAME.registerShader('chromakey', {
+    // تسجيل عنصر (Component) لفلتر الكروما (المورف) لتطبيق الشفافية بثبات
+    AFRAME.registerComponent('chromakey', {
       schema: {
-        src: {type: 'map'},
-        color: {default: {x: 0, y: 1, z: 0}, type: 'vec3', is: 'uniform'} // الشفافية تعمل على اللون الأخضر
+        src: {type: 'selector'},
+        color: {default: {x: 0, y: 1, z: 0}, type: 'vec3'} // الشفافية تعمل على اللون الأخضر
       },
-      init: function (data) {
-        var videoTexture = new THREE.VideoTexture(data.src);
+      init: function () {
+        var videoEl = this.data.src;
+        if (!videoEl) return;
+        var videoTexture = new THREE.VideoTexture(videoEl);
         videoTexture.minFilter = THREE.LinearFilter;
-        var col = new THREE.Color(data.color.x, data.color.y, data.color.z);
-        this.material = new THREE.ShaderMaterial({
+        var col = new THREE.Color(this.data.color.x, this.data.color.y, this.data.color.z);
+
+        this.myMaterial = new THREE.ShaderMaterial({
           uniforms: {
             color: { type: 'c', value: col },
             texture: { type: 't', value: videoTexture }
@@ -43,6 +46,15 @@
           `,
           transparent: true
         });
+
+        this.applyToMesh = this.applyToMesh.bind(this);
+        this.el.addEventListener('model-loaded', this.applyToMesh);
+        this.el.addEventListener('object3dset', this.applyToMesh);
+        this.applyToMesh();
+      },
+      applyToMesh: function () {
+        var mesh = this.el.getObject3D('mesh');
+        if (mesh) mesh.material = this.myMaterial;
       }
     });
   </script>
@@ -76,7 +88,7 @@
 
         <!-- استخدام العنصر مع كود إزالة الخلفية الخضراء، مقاس 1080×1920 -->
         <a-entity geometry="primitive: plane; width: 1; height: 1.778"
-          material="shader: chromakey; src: #arVideo; color: 0 1 0" position="0 0 0"></a-entity>
+          chromakey="src: #arVideo; color: 0 1 0" position="0 0 0"></a-entity>
 
         <!-- نص إبداعي في الأسفل -->
         <a-text value="Made by SMADI AGENCY" position="0 -1.1 0" align="center" color="#FFFFFF" width="2.5"
