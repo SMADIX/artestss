@@ -10,19 +10,23 @@
     AFRAME.registerComponent('chromakey', {
       schema: {
         src: {type: 'selector'},
-        color: {default: {x: 0, y: 1, z: 0}, type: 'vec3'} // الشفافية تعمل على اللون الأخضر
+        color: {default: '#0ea432', type: 'color'}, // استخدام اللون المستخرج من لقطة الشاشة
+        similarity: {default: 0.35, type: 'number'},
+        smoothness: {default: 0.1, type: 'number'}
       },
       init: function () {
         var videoEl = this.data.src;
         if (!videoEl) return;
         var videoTexture = new THREE.VideoTexture(videoEl);
         videoTexture.minFilter = THREE.LinearFilter;
-        var col = new THREE.Color(this.data.color.x, this.data.color.y, this.data.color.z);
+        var col = new THREE.Color(this.data.color);
 
         this.myMaterial = new THREE.ShaderMaterial({
           uniforms: {
             color: { value: col },
-            srcTexture: { value: videoTexture }
+            srcTexture: { value: videoTexture },
+            similarity: { value: this.data.similarity },
+            smoothness: { value: this.data.smoothness }
           },
           vertexShader: `
             varying vec2 vUv;
@@ -34,23 +38,35 @@
           fragmentShader: `
             uniform vec3 color;
             uniform sampler2D srcTexture;
+            uniform float similarity;
+            uniform float smoothness;
             varying vec2 vUv;
             void main() {
               vec4 texColor = texture2D(srcTexture, vUv);
-              // حساب درجة التطابق مع اللون الأخضر
-              float dist = length(texColor.rgb - color);
+              // حساب درجة التطابق مع اللون المحدد (مثل الأخضر بالدرجة الموجودة في الفيديو)
+              float dist = distance(texColor.rgb, color);
               // جعل اللون المتقارب شفافاً بالتدريج
-              float alpha = smoothstep(0.3, 0.45, dist);
+              float alpha = smoothstep(similarity, similarity + smoothness, dist);
               gl_FragColor = vec4(texColor.rgb, alpha);
             }
           `,
-          transparent: true
+          transparent: true,
+          side: THREE.FrontSide
         });
 
         this.applyToMesh = this.applyToMesh.bind(this);
         this.el.addEventListener('model-loaded', this.applyToMesh);
         this.el.addEventListener('object3dset', this.applyToMesh);
-        this.applyToMesh();
+        if (this.el.getObject3D('mesh')) {
+           this.applyToMesh();
+        }
+      },
+      update: function () {
+        if (this.myMaterial) {
+          this.myMaterial.uniforms.color.value.set(this.data.color);
+          this.myMaterial.uniforms.similarity.value = this.data.similarity;
+          this.myMaterial.uniforms.smoothness.value = this.data.smoothness;
+        }
       },
       applyToMesh: function () {
         var mesh = this.el.getObject3D('mesh');
@@ -88,7 +104,7 @@
 
         <!-- استخدام العنصر مع كود إزالة الخلفية الخضراء، مقاس 1080×1920 -->
         <a-entity geometry="primitive: plane; width: 1; height: 1.778"
-          chromakey="src: #arVideo; color: 0 1 0" position="0 0 0"></a-entity>
+          chromakey="src: #arVideo; color: #0EA432; similarity: 0.35; smoothness: 0.1" position="0 0 0"></a-entity>
 
         <!-- نص إبداعي في الأسفل -->
         <a-text value="Made by SMADI AGENCY" position="0 -1.1 0" align="center" color="#FFFFFF" width="2.5"
@@ -173,7 +189,7 @@
               video.pause();
             })
             .catch(error => {
-              debugDiv.innerHTML += '<br>Play fail: ' + error;
+              debugDiv.innerHTML += '<br>Play fail: ' + error.message;
             });
           }
         } catch (e) {
@@ -184,7 +200,12 @@
       // تشغيل الفيديو عند رؤية الصورة
       target.addEventListener("targetFound", event => {
         debugDiv.innerHTML += "<br>Target Found!";
-        video.play();
+        var playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            debugDiv.innerHTML += "<br>TargetFound Play Error: " + e.message;
+          });
+        }
         // إطلاق حركة الظهور (Transition)
         arContainer.emit('start-anim');
       });
