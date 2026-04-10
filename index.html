@@ -71,7 +71,7 @@
       التجربة</button>
   </div>
 
-  <a-scene mindar-image="imageTargetSrc: ./crttargets.mind; filterMinCF: 0.0001; filterBeta: 0.1;"
+  <a-scene mindar-image="imageTargetSrc: ./crttargets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 0.1;"
     vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
     <a-assets>
       <video id="arVideo" src="./my_video7.mp4" loop="true" crossorigin="anonymous" playsinline
@@ -143,6 +143,24 @@
       // عند ضغط زر البداية
       startButton.addEventListener('click', function () {
         startScreen.style.display = 'none';
+
+        // اختبار الكاميرا مباشرة للحصول على الخطأ الفعلي قبل تشغيل MindAR
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({video: true})
+                .then(function(stream) {
+                    debugDiv.innerHTML += '<br>Camera Access: Granted!';
+                    // إغلاق البث التجريبي
+                    stream.getTracks().forEach(t => t.stop());
+                    // تشغيل نظام AR المعزز
+                    scene.systems["mindar-image-system"].start();
+                })
+                .catch(function(err) {
+                    debugDiv.innerHTML += '<br>Camera BLOCKED: ' + err.name + ' - ' + err.message;
+                    debugDiv.innerHTML += '<br>يرجى التأكد من صلاحيات الكاميرا للمتصفح.';
+                });
+        } else {
+            debugDiv.innerHTML += '<br>متصفحك لا يدعم الكاميرا بشكل سليم (قد تحتاج لتحديث أو استخدام سفاري/كروم مباشر).';
+        }
 
         // تفعيل الصوت بعد تفاعل المستخدم مع الشاشة
         video.muted = false;
