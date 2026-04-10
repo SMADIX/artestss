@@ -102,9 +102,15 @@
       <a-entity id="ar-container" scale="0 0 0"
         animation="property: scale; from: 0 0 0; to: 1 1 1; dur: 800; easing: easeOutElastic; startEvents: start-anim">
 
-        <!-- استخدام العنصر مع كود إزالة الخلفية الخضراء، مقاس 1080×1920 -->
+        <!-- استخدام العنصر مع كود إزالة الخلفية الخضراء، مقاس 1080×1920. 
+             تم إضافة خصائص position و scale ليسهل عليك تحريك الفيديو ومطابقته بالضبط. 
+             لتحريكه يساراً: اجعل الرقم الأول في position سالباً أكثر (مثل -0.15)
+             لتحريكه للأعلى: اجعل الرقم الثاني موجباً (مثل 0.1)
+             لتصغيره: قلل قيمة الـ scale لتصبح مثلا 0.8 0.8 0.8 -->
         <a-entity geometry="primitive: plane; width: 1; height: 1.778"
-          chromakey="src: #arVideo; color: #0EA432; similarity: 0.35; smoothness: 0.1" position="0 0 0"></a-entity>
+          chromakey="src: #arVideo; color: #0EA432; similarity: 0.45; smoothness: 0.15" 
+          position="-0.15 0.1 0" 
+          scale="0.9 0.9 1"></a-entity>
 
         <!-- نص إبداعي في الأسفل -->
         <a-text value="Made by SMADI AGENCY" position="0 -1.1 0" align="center" color="#FFFFFF" width="2.5"
