@@ -5,6 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <script>
+    // تسجيل كود برمجي (Shader) لإزالة اللون الأخضر من خلفية الفيديو (الكروما)
+    AFRAME.registerShader('chromakey', {
+      schema: {
+        src: {type: 'map'},
+        color: {default: {x: 0, y: 1, z: 0}, type: 'vec3', is: 'uniform'} // الشفافية تعمل على اللون الأخضر
+      },
+      init: function (data) {
+        var videoTexture = new THREE.VideoTexture(data.src);
+        videoTexture.minFilter = THREE.LinearFilter;
+        var col = new THREE.Color(data.color.x, data.color.y, data.color.z);
+        this.material = new THREE.ShaderMaterial({
+          uniforms: {
+            color: { type: 'c', value: col },
+            texture: { type: 't', value: videoTexture }
+          },
+          vertexShader: `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            uniform vec3 color;
+            uniform sampler2D texture;
+            varying vec2 vUv;
+            void main() {
+              vec4 texColor = texture2D(texture, vUv);
+              // حساب درجة التطابق مع اللون الأخضر
+              float dist = length(texColor.rgb - color);
+              // جعل اللون المتقارب شفافاً بالتدريج
+              float alpha = smoothstep(0.3, 0.45, dist);
+              gl_FragColor = vec4(texColor.rgb, alpha);
+            }
+          `,
+          transparent: true
+        });
+      }
+    });
+  </script>
 </head>
 
 <body>
@@ -21,7 +62,7 @@
   <a-scene mindar-image="imageTargetSrc: ./crttargets.mind; filterMinCF: 0.0001; filterBeta: 0.1;"
     vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
     <a-assets>
-      <video id="arVideo" src="./Do_a_professional.mp4" loop="true" crossorigin="anonymous" playsinline
+      <video id="arVideo" src="./my_video7.mp4" loop="true" crossorigin="anonymous" playsinline
         webkit-playsinline></video>
       <a-asset-item id="myModel" src="./model.glb"></a-asset-item>
     </a-assets>
@@ -33,8 +74,9 @@
       <a-entity id="ar-container" scale="0 0 0"
         animation="property: scale; from: 0 0 0; to: 1 1 1; dur: 800; easing: easeOutElastic; startEvents: start-anim">
 
-        <!-- قياس 1080 عرض و 1920 طول (الارتفاع قسمة العرض = 1920/1080 = 1.778) -->
-        <a-video src="#arVideo" width="1" height="1.778" position="0 0 0"></a-video>
+        <!-- استخدام العنصر مع كود إزالة الخلفية الخضراء، مقاس 1080×1920 -->
+        <a-entity geometry="primitive: plane; width: 1; height: 1.778"
+          material="shader: chromakey; src: #arVideo; color: 0 1 0" position="0 0 0"></a-entity>
 
         <!-- نص إبداعي في الأسفل -->
         <a-text value="Made by SMADI AGENCY" position="0 -1.1 0" align="center" color="#FFFFFF" width="2.5"
